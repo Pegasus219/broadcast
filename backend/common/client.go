@@ -1,6 +1,7 @@
 package common
 
 import (
+	"broadcast/backend/message"
 	"github.com/gorilla/websocket"
 	"log"
 )
@@ -12,14 +13,14 @@ type Client struct {
 	//连接的socket
 	socket *websocket.Conn
 	//待发送的消息通道
-	message chan *string
+	message chan message.MsgInterface
 }
 
 func NewClient(id string, conn *websocket.Conn) *Client {
 	return &Client{
 		id:      id,
 		socket:  conn,
-		message: make(chan *string),
+		message: make(chan message.MsgInterface),
 	}
 }
 
@@ -57,7 +58,7 @@ func (c *Client) HandlePush() {
 				return
 			}
 			//有消息就写入，发送给客户端
-			err := c.socket.WriteMessage(websocket.TextMessage, []byte(*msg))
+			err := c.socket.WriteMessage(websocket.TextMessage, msg.Extract())
 			if err != nil {
 				log.Println(err)
 			}

@@ -1,6 +1,9 @@
 package common
 
-import "broadcast/backend/common/utils"
+import (
+	"broadcast/backend/common/utils"
+	"broadcast/backend/message"
+)
 
 //ws客户端管理器
 type ClientManager struct {
@@ -9,7 +12,7 @@ type ClientManager struct {
 	//客户端 map 储存并管理所有的长连接client
 	clients map[*Client]bool
 	//业务方发送来的的message我们用broadcast来接收，并最后分发给所有的client
-	broadcast chan *string
+	broadcast chan message.MsgInterface
 	//新创建的长连接client
 	register chan *Client
 	//新注销的长连接client
@@ -19,7 +22,7 @@ type ClientManager struct {
 func NewClientManager(group string) *ClientManager {
 	return &ClientManager{
 		group:      group,
-		broadcast:  make(chan *string, utils.GetChannelBuffer()),
+		broadcast:  make(chan message.MsgInterface, utils.GetChannelBuffer()),
 		register:   make(chan *Client),
 		unregister: make(chan *Client),
 		clients:    make(map[*Client]bool),
@@ -51,10 +54,10 @@ func (m *ClientManager) Start() {
 			}
 
 		//将同分组内的消息转发给注册的client
-		case message := <-m.broadcast:
+		case msg := <-m.broadcast:
 			//遍历已经连接的客户端，把消息发送给他们
 			for client := range m.clients {
-				client.message <- message
+				client.message <- msg
 			}
 		}
 	}

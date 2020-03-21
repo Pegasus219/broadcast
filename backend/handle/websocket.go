@@ -21,7 +21,7 @@ func Websocket(w http.ResponseWriter, r *http.Request) {
 	group := r.URL.Query().Get("group")
 
 	//每一次连接都会新开一个client，client.id通过uuid生成保证每次都是不同的
-	uniqueId := uuid.Must(uuid.NewV4()).String()
+	uniqueId := uuid.NewV4().String()
 
 	//创建客户端websocket对象
 	client := common.NewClient(uniqueId, conn)

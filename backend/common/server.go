@@ -1,6 +1,7 @@
 package common
 
 import (
+	"broadcast/backend/message"
 	"sync"
 )
 
@@ -27,11 +28,12 @@ func InitGroupManager(group string) *ClientManager {
 }
 
 //向指定分组的ws客户端管理器转发消息（如果没有客户端接入，则忽略该消息）
-func PushMsg(group, msg string) {
+func PushMsg(group, msg string, msgObj message.MsgInterface) {
 	publicManager.RLock()
 	defer publicManager.RUnlock()
 	if m, has := publicManager.mc[group]; has {
-		m.broadcast <- &msg
+		msgObj.Inject(msg)
+		m.broadcast <- msgObj
 	}
 }
 
